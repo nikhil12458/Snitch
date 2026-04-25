@@ -10,7 +10,7 @@ export const useAuth = () => {
     password,
     contact,
     fullname,
-    isSeller,
+    isSeller = false,
   }) {
     const data = await register({ email, password, contact, fullname, isSeller });
 
