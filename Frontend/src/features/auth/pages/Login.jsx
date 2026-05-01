@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../hook/useAuth";
+import ContinueWithGoogle from "../components/ContinueWithGoogle";
 
 const Login = () => {
   const { handleLogin } = useAuth();
@@ -141,6 +142,18 @@ const Login = () => {
               >
                 Sign In
               </button>
+
+              {/* Divider */}
+              <div className="flex items-center justify-center space-x-3 py-3">
+                <div className="h-px bg-[#2A2A2A] flex-1"></div>
+                <span className="text-xs font-medium text-[#4D4732] uppercase tracking-wider">
+                  or
+                </span>
+                <div className="h-px bg-[#2A2A2A] flex-1"></div>
+              </div>
+
+              {/* Google Button */}
+              <ContinueWithGoogle />
             </div>
           </form>
 

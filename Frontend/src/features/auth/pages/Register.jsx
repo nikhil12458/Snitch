@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useAuth } from "../hook/useAuth";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
+import ContinueWithGoogle from "../components/ContinueWithGoogle";
 
 const Register = () => {
   const { handleRegister } = useAuth();
@@ -203,13 +204,25 @@ const Register = () => {
               </div>
             </div>
 
-            <div className="pt-4 lg:pt-6">
+            <div className="pt-4 lg:pt-6 space-y-4 lg:space-y-5">
               <button
                 type="submit"
                 className="w-full bg-gradient-to-r from-[#FFD700] to-[#E9C400] hover:from-[#E9C400] hover:to-[#DBC677] text-[#3A3000] font-bold py-3.5 lg:py-4 px-6 rounded-xl transition-all shadow-[0_0_20px_rgba(255,215,0,0.15)] hover:shadow-[0_0_30px_rgba(255,215,0,0.25)] transform hover:-translate-y-0.5"
               >
                 Create Account
               </button>
+
+              {/* Divider */}
+              <div className="flex items-center justify-center space-x-3">
+                <div className="h-px bg-[#2A2A2A] flex-1"></div>
+                <span className="text-xs font-medium text-[#4D4732] uppercase tracking-wider">
+                  or
+                </span>
+                <div className="h-px bg-[#2A2A2A] flex-1"></div>
+              </div>
+
+              {/* Google Button */}
+              <ContinueWithGoogle />
             </div>
           </form>
 
