@@ -4,11 +4,13 @@ import {
   validateRegisterUser,
 } from "../validator/auth.validator.js";
 import {
+  getMe,
   googleCallback,
   login,
   register,
 } from "../controllers/auth.controller.js";
 import passport from "passport";
+import { authenticateUser } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
@@ -26,5 +28,13 @@ router.get(
   }),
   googleCallback,
 );
+
+/*
+    @route GET /api/auth/me
+    @desc Get the logged in user's details
+    @access Private
+ */
+
+router.get("/me", authenticateUser, getMe);
 
 export default router;
