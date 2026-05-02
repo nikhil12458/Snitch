@@ -15,7 +15,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-[#F9F9F6] text-[#2C2C2A] font-sans overflow-x-hidden selection:bg-[#2C2C2A] selection:text-[#F9F9F6]">
       {/* Top Navbar Component */}
-      <nav className="fixed w-full z-50 bg-[#F9F9F6]/90 backdrop-blur-xl border-b border-[#E0DFD8] px-8 py-5 flex justify-between items-center transition-all duration-300">
+      <nav className="fixed w-full z-50 bg-[#F9F9F6]/90 backdrop-blur-xl border-b border-[#E0DFD8] px-8 py-3 flex justify-between items-center transition-all duration-300">
         <Link to="/" className="h-8 flex items-center">
           <img src="/snitch_logo_light.png" alt="SNITCH" className="h-full object-contain" />
         </Link>
