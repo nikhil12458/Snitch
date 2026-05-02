@@ -86,19 +86,19 @@ const CreateProduct = () => {
   /* ─── Shared class strings ──────────────────────────── */
 
   const labelCls =
-    "block text-[11px] font-semibold uppercase tracking-[0.15em] text-[#D0C6AB] mb-2";
+    "block text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8A8678] mb-2";
 
   const inputCls =
-    "w-full bg-[#2A2A2A] text-white px-4 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#FFD700]/60 transition-all placeholder:text-[#4D4732] text-sm";
+    "w-full bg-[#FFFFFF] text-[#2C2C2A] px-4 py-3.5 rounded-xl border border-[#E0DFD8] focus:outline-none focus:ring-2 focus:ring-[#C5C2B7]/60 focus:border-[#C5C2B7] transition-all placeholder:text-[#C5C2B7] text-sm shadow-sm";
 
   /* ─── Render ────────────────────────────────────────── */
 
   return (
-    <div className="min-h-screen bg-[#0E0E0E] text-[#E5E2E1] font-['Inter',sans-serif] selection:bg-[#FFD700] selection:text-[#131313] relative overflow-x-hidden">
+    <div className="min-h-screen bg-[#F9F9F6] text-[#2C2C2A] font-sans selection:bg-[#2C2C2A] selection:text-[#F9F9F6] relative overflow-x-hidden">
       {/* Ambient glow accents */}
       <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-[#FFD700]/[0.06] blur-[140px]" />
-        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-[#E9C400]/[0.05] blur-[160px]" />
+        <div className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full bg-[#C5C2B7]/10 blur-[140px]" />
+        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-[#E0DFD8]/20 blur-[160px]" />
       </div>
 
       <div className="relative z-10 min-h-screen flex flex-col">
@@ -108,7 +108,7 @@ const CreateProduct = () => {
             type="button"
             onClick={() => navigate(-1)}
             aria-label="Go back"
-            className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#1A1A1A] border border-[#2A2A2A] text-[#D0C6AB] hover:border-[#FFD700]/40 hover:text-[#FFD700] transition-all"
+            className="flex items-center justify-center w-9 h-9 rounded-xl bg-[#FFFFFF] border border-[#E0DFD8] text-[#8A8678] hover:border-[#2C2C2A] hover:text-[#2C2C2A] transition-all shadow-sm"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -125,10 +125,10 @@ const CreateProduct = () => {
             </svg>
           </button>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-light tracking-tight text-white leading-none">
+            <h1 className="text-2xl sm:text-3xl font-light tracking-tight text-[#2C2C2A] leading-none">
               Create Product
             </h1>
-            <p className="text-xs text-[#D0C6AB] mt-1">
+            <p className="text-xs text-[#8A8678] mt-1 font-medium">
               Add a new item to your collection
             </p>
           </div>
@@ -136,7 +136,7 @@ const CreateProduct = () => {
 
         {/* ── Divider ───────────────────────────────────── */}
         <div className="w-full max-w-[720px] mx-auto px-6 mt-8">
-          <div className="h-px bg-[#2A2A2A]" />
+          <div className="h-px bg-[#E0DFD8]" />
         </div>
 
         {/* ── Form ──────────────────────────────────────── */}
@@ -209,15 +209,15 @@ const CreateProduct = () => {
                     name="priceCurrency"
                     value={formData.priceCurrency}
                     onChange={handleChange}
-                    className={`${inputCls} cursor-pointer appearance-none pr-8`}
+                    className={`${inputCls} cursor-pointer appearance-none pr-8 bg-transparent`}
                     style={{
-                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23D0C6AB' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238A8678' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
                       backgroundRepeat: "no-repeat",
                       backgroundPosition: "calc(100% - 12px) center",
                     }}
                   >
                     {CURRENCIES.map((c) => (
-                      <option key={c} value={c} className="bg-[#1A1A1A]">
+                      <option key={c} value={c} className="bg-[#FFFFFF]">
                         {c}
                       </option>
                     ))}
@@ -230,7 +230,7 @@ const CreateProduct = () => {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <p className={`${labelCls} mb-0`}>Product Images</p>
-                <span className="text-[11px] text-[#4D4732] tracking-wide">
+                <span className="text-[11px] text-[#8A8678] tracking-wide font-medium">
                   {images.length} / {MAX_IMAGES}
                 </span>
               </div>
@@ -253,15 +253,15 @@ const CreateProduct = () => {
                     transition-all duration-200 select-none
                     ${
                       isDragging
-                        ? "border-[#FFD700] bg-[#FFD700]/[0.04] shadow-[0_0_40px_rgba(255,215,0,0.08)]"
-                        : "border-[#2A2A2A] bg-[#131313] hover:border-[#FFD700]/40 hover:bg-[#FFD700]/[0.02]"
+                        ? "border-[#2C2C2A] bg-[#2C2C2A]/5 shadow-sm"
+                        : "border-[#E0DFD8] bg-[#FFFFFF] hover:border-[#C5C2B7] hover:bg-[#F0EFEA]"
                     }
                   `}
                 >
                   {/* Camera icon */}
                   <div
                     className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
-                      isDragging ? "bg-[#FFD700]/20" : "bg-[#2A2A2A]"
+                      isDragging ? "bg-[#2C2C2A]/10" : "bg-[#F0EFEA]"
                     }`}
                   >
                     <svg
@@ -270,7 +270,7 @@ const CreateProduct = () => {
                       height="20"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke={isDragging ? "#FFD700" : "#D0C6AB"}
+                      stroke={isDragging ? "#2C2C2A" : "#8A8678"}
                       strokeWidth="1.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -281,13 +281,13 @@ const CreateProduct = () => {
                   </div>
 
                   <div className="text-center">
-                    <p className="text-sm text-[#D0C6AB] font-light">
+                    <p className="text-sm text-[#8A8678] font-medium">
                       Drop images here or{" "}
-                      <span className="text-[#FFD700] font-medium">
+                      <span className="text-[#2C2C2A] font-medium underline decoration-[#E0DFD8] underline-offset-4">
                         click to browse
                       </span>
                     </p>
-                    <p className="text-[11px] text-[#4D4732] mt-1 tracking-wide uppercase">
+                    <p className="text-[11px] text-[#8A8678] mt-1 tracking-wide uppercase font-light">
                       PNG, JPG, WEBP · up to {MAX_IMAGES} photos
                     </p>
                   </div>
@@ -312,14 +312,14 @@ const CreateProduct = () => {
                       <img
                         src={preview}
                         alt={`Product image ${idx + 1}`}
-                        className="w-full h-full object-cover rounded-xl border border-[#2A2A2A] group-hover:border-[#FFD700]/40 transition-all"
+                        className="w-full h-full object-cover rounded-xl border border-[#E0DFD8] group-hover:border-[#2C2C2A] transition-all"
                       />
                       {/* Remove overlay */}
                       <button
                         type="button"
                         onClick={() => removeImage(idx)}
                         aria-label="Remove image"
-                        className="absolute inset-0 flex items-center justify-center rounded-xl bg-[#0E0E0E]/70 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute inset-0 flex items-center justify-center rounded-xl bg-[#2C2C2A]/70 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px]"
                       >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -327,7 +327,7 @@ const CreateProduct = () => {
                           height="16"
                           viewBox="0 0 24 24"
                           fill="none"
-                          stroke="#FFD700"
+                          stroke="#FFFFFF"
                           strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -346,7 +346,7 @@ const CreateProduct = () => {
                       key={`empty-${i}`}
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="aspect-square rounded-xl border border-dashed border-[#2A2A2A] flex items-center justify-center text-[#4D4732] hover:border-[#FFD700]/40 hover:text-[#FFD700]/60 transition-all"
+                      className="aspect-square rounded-xl border border-dashed border-[#E0DFD8] flex items-center justify-center text-[#C5C2B7] hover:border-[#2C2C2A] hover:text-[#2C2C2A] transition-all bg-[#FFFFFF]"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -372,7 +372,7 @@ const CreateProduct = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-[#FFD700] to-[#E9C400] hover:from-[#E9C400] hover:to-[#DBC677] disabled:opacity-50 disabled:cursor-not-allowed text-[#3A3000] font-bold py-4 rounded-xl text-sm tracking-wide transition-all shadow-[0_0_30px_rgba(255,215,0,0.12)] hover:shadow-[0_0_40px_rgba(255,215,0,0.22)] transform hover:-translate-y-0.5 active:translate-y-0"
+                className="w-full bg-[#2C2C2A] hover:bg-[#1A1A1A] disabled:opacity-50 disabled:cursor-not-allowed text-[#F9F9F6] font-medium py-4 rounded-xl text-sm tracking-widest uppercase transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0"
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center gap-2">
