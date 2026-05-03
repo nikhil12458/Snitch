@@ -1,10 +1,12 @@
 import { useParams, useNavigate } from "react-router";
 import { useProduct } from "../hooks/useProduct";
 import { useEffect, useState } from "react";
+import { useCart } from "../../cart/hook/useCart";
 
 const ProductDetail = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const { handleAddItem } = useCart();
 
   const [product, setProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,7 +24,7 @@ const ProductDetail = () => {
       const data = await handleGetProductById(productId);
       const fetchedProduct = data?.product || data;
       setProduct(fetchedProduct);
-      
+
       if (fetchedProduct?.variants?.length > 0) {
         const normVariants = fetchedProduct.variants.map((v) => {
           const normAttr = {};
@@ -41,7 +43,7 @@ const ProductDetail = () => {
         setSelectedAttributes({});
         setSelectedVariant(null);
       }
-      
+
       setSelectedImageIndex(0);
     } catch (error) {
       console.error(error);
@@ -92,7 +94,7 @@ const ProductDetail = () => {
     } else {
       newAttributes[key] = value;
     }
-    
+
     setSelectedAttributes(newAttributes);
 
     if (Object.keys(newAttributes).length === 0) {
@@ -102,14 +104,18 @@ const ProductDetail = () => {
     }
 
     const matchingVariant = normalizedVariants.find((v) => {
-      return Object.entries(newAttributes).every(([k, val]) => v.attributes[k] === val);
+      return Object.entries(newAttributes).every(
+        ([k, val]) => v.attributes[k] === val,
+      );
     });
-    
+
     if (matchingVariant) {
       setSelectedVariant(matchingVariant);
       setSelectedImageIndex(0);
     } else {
-      const fallbackVariant = normalizedVariants.find((v) => v.attributes[key] === value);
+      const fallbackVariant = normalizedVariants.find(
+        (v) => v.attributes[key] === value,
+      );
       if (fallbackVariant) {
         setSelectedAttributes(fallbackVariant.attributes);
         setSelectedVariant(fallbackVariant);
@@ -121,8 +127,13 @@ const ProductDetail = () => {
     }
   };
 
-  const currentImages = selectedVariant?.images?.length > 0 ? selectedVariant.images : product?.images || [];
-  const currentPrice = selectedVariant?.price?.amount ? selectedVariant.price : product?.price;
+  const currentImages =
+    selectedVariant?.images?.length > 0
+      ? selectedVariant.images
+      : product?.images || [];
+  const currentPrice = selectedVariant?.price?.amount
+    ? selectedVariant.price
+    : product?.price;
 
   return (
     <div className="min-h-screen bg-[#F9F9F6] text-[#2C2C2A] font-sans selection:bg-[#2C2C2A] selection:text-[#F9F9F6]">
@@ -264,12 +275,16 @@ const ProductDetail = () => {
               {normalizedVariants.length > 0 ? (
                 selectedVariant ? (
                   selectedVariant.stock > 0 ? (
-                    <span className="text-green-600">{selectedVariant.stock} in stock</span>
+                    <span className="text-green-600">
+                      {selectedVariant.stock} in stock
+                    </span>
                   ) : (
                     <span className="text-red-500">Out of stock</span>
                   )
                 ) : (
-                  <span className="text-[#8A8678]">Please select all options</span>
+                  <span className="text-[#8A8678]">
+                    Please select all options
+                  </span>
                 )
               ) : (
                 <span className="text-[#8A8678]">Stock unavailable</span>
@@ -315,7 +330,15 @@ const ProductDetail = () => {
 
             {/* Actions */}
             <div className="flex flex-col gap-4 mt-auto">
-              <button className="w-full bg-[#FFFFFF] border border-[#2C2C2A] text-[#2C2C2A] hover:bg-[#F0EFEA] px-8 py-4 rounded-full font-medium tracking-widest text-sm uppercase transition-all duration-300 shadow-sm">
+              <button
+                onClick={() => {
+                  handleAddItem({
+                    productId: product._id,
+                    variantId: selectedVariant?._id,
+                  });
+                }}
+                className="w-full bg-[#FFFFFF] border border-[#2C2C2A] text-[#2C2C2A] hover:bg-[#F0EFEA] px-8 py-4 rounded-full font-medium tracking-widest text-sm uppercase transition-all duration-300 shadow-sm"
+              >
                 Add to Cart
               </button>
               <button className="w-full bg-[#2C2C2A] border border-[#2C2C2A] text-[#F9F9F6] hover:bg-[#1A1A1A] px-8 py-4 rounded-full font-medium tracking-widest text-sm uppercase transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">

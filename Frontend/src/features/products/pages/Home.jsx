@@ -14,34 +14,6 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-[#F9F9F6] text-[#2C2C2A] font-sans overflow-x-hidden selection:bg-[#2C2C2A] selection:text-[#F9F9F6]">
-      {/* Top Navbar Component */}
-      <nav className="fixed w-full z-50 bg-[#F9F9F6]/90 backdrop-blur-xl border-b border-[#E0DFD8] px-8 py-3 flex justify-between items-center transition-all duration-300">
-        <Link to="/" className="h-8 flex items-center">
-          <img src="/snitch_logo_light.png" alt="SNITCH" className="h-full object-contain" />
-        </Link>
-        <div className="flex items-center">
-          {user ? (
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#2C2C2A] flex items-center justify-center text-[#F9F9F6] text-xs font-medium border border-[#E0DFD8] shadow-sm">
-                {(user?.fullname ||
-                  user?.name ||
-                  user?.firstName ||
-                  "U")[0].toUpperCase()}
-              </div>
-              <span className="text-sm tracking-widest text-[#8A8678] font-medium hidden sm:block uppercase">
-                {user?.fullname || user?.name || user?.firstName || "User"}
-              </span>
-            </div>
-          ) : (
-            <Link
-              to="/login"
-              className="px-6 py-2 border border-[#2C2C2A] rounded-full hover:bg-[#2C2C2A] hover:text-[#F9F9F6] transition-all duration-300 text-xs tracking-[0.2em] text-[#2C2C2A] font-medium"
-            >
-              LOGIN
-            </Link>
-          )}
-        </div>
-      </nav>
 
       {/* Hero Section */}
       <div className="relative w-full min-h-[85vh] bg-[#F0EFEA] flex flex-col items-center justify-center py-32 overflow-hidden">
