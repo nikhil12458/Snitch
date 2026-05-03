@@ -256,52 +256,34 @@ const ProductDetail = () => {
               {product.title}
             </h1>
 
-            <div className="text-2xl font-medium text-[#2C2C2A] mb-8">
+            <div className="text-2xl font-medium text-[#2C2C2A] mb-2">
               {currentPrice?.currency} {currentPrice?.amount}
+            </div>
+
+            <div className="text-sm font-medium tracking-wide uppercase mb-8">
+              {normalizedVariants.length > 0 ? (
+                selectedVariant ? (
+                  selectedVariant.stock > 0 ? (
+                    <span className="text-green-600">{selectedVariant.stock} in stock</span>
+                  ) : (
+                    <span className="text-red-500">Out of stock</span>
+                  )
+                ) : (
+                  <span className="text-[#8A8678]">Please select all options</span>
+                )
+              ) : (
+                <span className="text-[#8A8678]">Stock unavailable</span>
+              )}
             </div>
 
             {/* Variants Section */}
             {normalizedVariants.length > 0 && (
-              <div className="mb-10 p-6 bg-[#FFFFFF] rounded-2xl border border-[#E0DFD8] shadow-sm">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-sm font-medium tracking-widest uppercase text-[#2C2C2A]">
-                    Available Options
-                  </h3>
-                  {Object.keys(selectedAttributes).length > 0 && (
-                    <button
-                      onClick={() => {
-                        setSelectedAttributes({});
-                        setSelectedVariant(null);
-                        setSelectedImageIndex(0);
-                      }}
-                      className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F0EFEA] text-[#8A8678] hover:bg-[#2C2C2A] hover:text-[#F9F9F6] transition-all duration-300 text-[10px] font-semibold tracking-widest uppercase"
-                      title="Reset to original product"
-                    >
-                      <svg 
-                        xmlns="http://www.w3.org/2000/svg" 
-                        width="12" 
-                        height="12" 
-                        viewBox="0 0 24 24" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        strokeWidth="2.5" 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        className="transition-transform group-hover:-rotate-180 duration-500"
-                      >
-                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                        <path d="M3 3v5h5" />
-                      </svg>
-                      Reset
-                    </button>
-                  )}
-                </div>
-
-                {Object.keys(attributeOptions).map((attrKey, index, arr) => (
-                  <div key={attrKey} className={index === arr.length - 1 ? "" : "mb-6"}>
-                    <div className="text-xs font-semibold tracking-widest uppercase text-[#8A8678] mb-3">
+              <div className="mb-8">
+                {Object.keys(attributeOptions).map((attrKey) => (
+                  <div key={attrKey} className="mb-5">
+                    <h3 className="text-sm font-medium tracking-widest uppercase text-[#8A8678] mb-3">
                       {attrKey}
-                    </div>
+                    </h3>
                     <div className="flex flex-wrap gap-3">
                       {Array.from(attributeOptions[attrKey]).map((option) => (
                         <button
