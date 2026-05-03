@@ -16,7 +16,7 @@ const ProductDetail = () => {
     setIsLoading(true);
     try {
       const data = await handleGetProductById(productId);
-      setProduct(data);
+      setProduct(data?.product || data);
       setSelectedImageIndex(0);
     } catch (error) {
       console.error(error);

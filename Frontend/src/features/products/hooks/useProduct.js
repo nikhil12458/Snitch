@@ -4,6 +4,7 @@ import {
   getSellerProducts,
   getAllProducts,
   getProductById,
+  addProductVariant,
 } from "../service/product.api";
 import { setSellerProducts, setProducts } from "../state/product.slice";
 
@@ -31,10 +32,16 @@ export const useProduct = () => {
     return data.product;
   }
 
+  async function handleAddProductVariant(productId, formData) {
+    const data = await addProductVariant(productId, formData);
+    return data;
+  }
+
   return {
     handleCreateProduct,
     handleGetSellerProducts,
     handleGetAllProducts,
     handleGetProductById,
+    handleAddProductVariant,
   };
 };
