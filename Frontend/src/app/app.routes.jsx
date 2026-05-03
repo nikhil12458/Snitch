@@ -8,9 +8,17 @@ import Home from "../features/products/pages/Home";
 import ProductDetail from "../features/products/pages/ProductDetail";
 import SellerProductDetail from "../features/products/pages/SellerProductDetail";
 import Cart from "../features/cart/pages/Cart";
-import Layout from "./components/Layout";
+import Layout from "../app/Layout";
 
 export const routes = createBrowserRouter([
+  {
+    path: "/register",
+    element: <Register />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
   {
     path: "/",
     element: <Layout />,
@@ -18,14 +26,6 @@ export const routes = createBrowserRouter([
       {
         path: "/",
         element: <Home />,
-      },
-      {
-        path: "/register",
-        element: <Register />,
-      },
-      {
-        path: "/login",
-        element: <Login />,
       },
       {
         path: "/product/:productId",
