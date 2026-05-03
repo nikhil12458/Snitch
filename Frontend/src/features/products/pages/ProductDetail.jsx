@@ -10,13 +10,38 @@ const ProductDetail = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
+  const [selectedAttributes, setSelectedAttributes] = useState({});
+  const [selectedVariant, setSelectedVariant] = useState(null);
+  const [normalizedVariants, setNormalizedVariants] = useState([]);
+
   const { handleGetProductById } = useProduct();
 
   async function fetchProductDetails() {
     setIsLoading(true);
     try {
       const data = await handleGetProductById(productId);
-      setProduct(data?.product || data);
+      const fetchedProduct = data?.product || data;
+      setProduct(fetchedProduct);
+      
+      if (fetchedProduct?.variants?.length > 0) {
+        const normVariants = fetchedProduct.variants.map((v) => {
+          const normAttr = {};
+          if (v.attributes) {
+            Object.entries(v.attributes).forEach(([k, val]) => {
+              normAttr[k.trim()] = typeof val === "string" ? val.trim() : val;
+            });
+          }
+          return { ...v, attributes: normAttr };
+        });
+        setNormalizedVariants(normVariants);
+        setSelectedAttributes({});
+        setSelectedVariant(null);
+      } else {
+        setNormalizedVariants([]);
+        setSelectedAttributes({});
+        setSelectedVariant(null);
+      }
+      
       setSelectedImageIndex(0);
     } catch (error) {
       console.error(error);
@@ -51,6 +76,54 @@ const ProductDetail = () => {
     );
   }
 
+  const attributeOptions = {};
+  normalizedVariants.forEach((v) => {
+    Object.entries(v.attributes).forEach(([k, val]) => {
+      if (!attributeOptions[k]) attributeOptions[k] = new Set();
+      attributeOptions[k].add(val);
+    });
+  });
+
+  const handleAttributeSelect = (key, value) => {
+    let newAttributes = { ...selectedAttributes };
+
+    if (newAttributes[key] === value) {
+      delete newAttributes[key];
+    } else {
+      newAttributes[key] = value;
+    }
+    
+    setSelectedAttributes(newAttributes);
+
+    if (Object.keys(newAttributes).length === 0) {
+      setSelectedVariant(null);
+      setSelectedImageIndex(0);
+      return;
+    }
+
+    const matchingVariant = normalizedVariants.find((v) => {
+      return Object.entries(newAttributes).every(([k, val]) => v.attributes[k] === val);
+    });
+    
+    if (matchingVariant) {
+      setSelectedVariant(matchingVariant);
+      setSelectedImageIndex(0);
+    } else {
+      const fallbackVariant = normalizedVariants.find((v) => v.attributes[key] === value);
+      if (fallbackVariant) {
+        setSelectedAttributes(fallbackVariant.attributes);
+        setSelectedVariant(fallbackVariant);
+        setSelectedImageIndex(0);
+      } else {
+        setSelectedVariant(null);
+        setSelectedImageIndex(0);
+      }
+    }
+  };
+
+  const currentImages = selectedVariant?.images?.length > 0 ? selectedVariant.images : product?.images || [];
+  const currentPrice = selectedVariant?.price?.amount ? selectedVariant.price : product?.price;
+
   return (
     <div className="min-h-screen bg-[#F9F9F6] text-[#2C2C2A] font-sans selection:bg-[#2C2C2A] selection:text-[#F9F9F6]">
       {/* Navbar space / Back button */}
@@ -82,9 +155,9 @@ const ProductDetail = () => {
           {/* Image Section */}
           <div className="w-full md:w-1/2 flex flex-col-reverse md:flex-row gap-3 md:gap-4">
             {/* Thumbnails Gallery (Vertical on md+, Horizontal on mobile) */}
-            {product.images && product.images.length > 1 && (
+            {currentImages && currentImages.length > 1 && (
               <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto md:overflow-x-hidden md:max-h-[80vh] scrollbar-hide pb-2 md:pb-0 md:pr-2">
-                {product.images.map((img, index) => (
+                {currentImages.map((img, index) => (
                   <button
                     key={img._id || index}
                     onClick={() => setSelectedImageIndex(index)}
@@ -105,22 +178,22 @@ const ProductDetail = () => {
             )}
 
             <div className="relative flex-1 aspect-[4/5] overflow-hidden bg-[#F0EFEA] rounded-2xl border border-[#E0DFD8] mb-4 md:mb-0 group">
-              {product.images && product.images.length > 0 ? (
+              {currentImages && currentImages.length > 0 ? (
                 <>
                   <img
-                    src={product.images[selectedImageIndex]?.url}
+                    src={currentImages[selectedImageIndex]?.url}
                     alt={product.title}
                     className="w-full h-full object-cover object-center mix-blend-multiply transition-opacity duration-300"
                   />
 
                   {/* Navigation Arrows */}
-                  {product.images.length > 1 && (
+                  {currentImages.length > 1 && (
                     <>
                       <button
                         onClick={(e) => {
                           e.preventDefault();
                           setSelectedImageIndex((prev) =>
-                            prev === 0 ? product.images.length - 1 : prev - 1,
+                            prev === 0 ? currentImages.length - 1 : prev - 1,
                           );
                         }}
                         className="absolute left-4 top-1/2 -translate-y-1/2 bg-[#FFFFFF]/80 backdrop-blur-sm text-[#2C2C2A] w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-[#E0DFD8] hover:bg-[#FFFFFF] shadow-sm"
@@ -144,7 +217,7 @@ const ProductDetail = () => {
                         onClick={(e) => {
                           e.preventDefault();
                           setSelectedImageIndex((prev) =>
-                            prev === product.images.length - 1 ? 0 : prev + 1,
+                            prev === currentImages.length - 1 ? 0 : prev + 1,
                           );
                         }}
                         className="absolute right-4 top-1/2 -translate-y-1/2 bg-[#FFFFFF]/80 backdrop-blur-sm text-[#2C2C2A] w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity border border-[#E0DFD8] hover:bg-[#FFFFFF] shadow-sm"
@@ -184,8 +257,70 @@ const ProductDetail = () => {
             </h1>
 
             <div className="text-2xl font-medium text-[#2C2C2A] mb-8">
-              {product.price?.currency} {product.price?.amount}
+              {currentPrice?.currency} {currentPrice?.amount}
             </div>
+
+            {/* Variants Section */}
+            {normalizedVariants.length > 0 && (
+              <div className="mb-10 p-6 bg-[#FFFFFF] rounded-2xl border border-[#E0DFD8] shadow-sm">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-sm font-medium tracking-widest uppercase text-[#2C2C2A]">
+                    Available Options
+                  </h3>
+                  {Object.keys(selectedAttributes).length > 0 && (
+                    <button
+                      onClick={() => {
+                        setSelectedAttributes({});
+                        setSelectedVariant(null);
+                        setSelectedImageIndex(0);
+                      }}
+                      className="group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#F0EFEA] text-[#8A8678] hover:bg-[#2C2C2A] hover:text-[#F9F9F6] transition-all duration-300 text-[10px] font-semibold tracking-widest uppercase"
+                      title="Reset to original product"
+                    >
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        width="12" 
+                        height="12" 
+                        viewBox="0 0 24 24" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2.5" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        className="transition-transform group-hover:-rotate-180 duration-500"
+                      >
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                        <path d="M3 3v5h5" />
+                      </svg>
+                      Reset
+                    </button>
+                  )}
+                </div>
+
+                {Object.keys(attributeOptions).map((attrKey, index, arr) => (
+                  <div key={attrKey} className={index === arr.length - 1 ? "" : "mb-6"}>
+                    <div className="text-xs font-semibold tracking-widest uppercase text-[#8A8678] mb-3">
+                      {attrKey}
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      {Array.from(attributeOptions[attrKey]).map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => handleAttributeSelect(attrKey, option)}
+                          className={`px-5 py-2 border rounded-full text-sm font-medium transition-all ${
+                            selectedAttributes[attrKey] === option
+                              ? "border-[#2C2C2A] bg-[#2C2C2A] text-[#F9F9F6]"
+                              : "border-[#E0DFD8] text-[#2C2C2A] hover:border-[#2C2C2A] bg-transparent"
+                          }`}
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="mb-10">
               <h3 className="text-sm font-medium tracking-widest uppercase text-[#8A8678] mb-3">
