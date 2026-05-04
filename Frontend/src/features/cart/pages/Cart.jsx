@@ -29,7 +29,7 @@ const QuantityStepper = ({ value, onDecrement, onIncrement }) => (
 /* ─────────────────────────────────────────
    Cart Item Card
 ───────────────────────────────────────── */
-const CartItemCard = ({ item, onRemove, onQuantityChange }) => {
+const CartItemCard = ({ item, onRemove, onDecrement, onIncrement }) => {
   const { product, variant: variantId, quantity, price } = item;
 
   // Resolve the variant object from the product's variants array
@@ -37,9 +37,7 @@ const CartItemCard = ({ item, onRemove, onQuantityChange }) => {
 
   // Pick best image: variant images first, then product images
   const images =
-    variantObj?.images?.length > 0
-      ? variantObj.images
-      : product?.images || [];
+    variantObj?.images?.length > 0 ? variantObj.images : product?.images || [];
   const mainImage = images[0]?.url;
 
   // Variant attributes for display
@@ -48,6 +46,18 @@ const CartItemCard = ({ item, onRemove, onQuantityChange }) => {
     key: k.trim(),
     value: typeof v === "string" ? v.trim() : v,
   }));
+
+  // Price difference calculation
+  let currentPriceAmt = variantObj?.price?.amount ?? product?.price?.amount;
+  if (currentPriceAmt === undefined && typeof variantObj?.price === "number") currentPriceAmt = variantObj.price;
+  if (currentPriceAmt === undefined && typeof product?.price === "number") currentPriceAmt = product.price;
+
+  let cartPriceAmt = price?.amount;
+  if (cartPriceAmt === undefined && typeof price === "number") cartPriceAmt = price;
+
+  const hasPriceChanged = currentPriceAmt !== undefined && cartPriceAmt !== undefined && currentPriceAmt !== cartPriceAmt;
+  const priceDiff = hasPriceChanged ? currentPriceAmt - cartPriceAmt : 0;
+  const absDiff = Math.abs(priceDiff);
 
   return (
     <div className="group flex gap-5 p-5 bg-[#F0EFEA] rounded-2xl border border-[#E0DFD8] hover:border-[#C5C2B7] transition-all duration-300">
@@ -103,39 +113,68 @@ const CartItemCard = ({ item, onRemove, onQuantityChange }) => {
           {/* Price */}
           <p className="text-[#2C2C2A] text-lg font-light">
             {price?.currency}{" "}
-            <span className="font-medium">{price?.amount?.toLocaleString("en-IN")}</span>
+            <span className="font-medium">
+              {price?.amount?.toLocaleString("en-IN")}
+            </span>
           </p>
         </div>
 
-        {/* Bottom row: qty + remove */}
-        <div className="flex items-center justify-between mt-4">
-          <QuantityStepper
-            value={quantity}
-            onDecrement={() => onQuantityChange(item._id, quantity - 1)}
-            onIncrement={() => onQuantityChange(item._id, quantity + 1)}
-          />
-          <button
-            onClick={() => onRemove(item._id)}
-            className="flex items-center gap-1.5 text-[#8A8678] hover:text-[#2C2C2A] transition-colors duration-200 text-xs uppercase tracking-widest font-medium"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+        <div>
+          {/* Bottom row: qty + remove */}
+          <div className="flex items-center justify-between mt-4">
+            <QuantityStepper
+              value={quantity}
+              onDecrement={() => onDecrement(product._id, variantId)}
+              onIncrement={() => onIncrement(product._id, variantId)}
+            />
+            <button
+              onClick={() => onRemove(product._id, variantId)}
+              className="flex items-center gap-1.5 text-[#8A8678] hover:text-[#2C2C2A] transition-colors duration-200 text-xs uppercase tracking-widest font-medium"
             >
-              <polyline points="3 6 5 6 21 6" />
-              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-              <path d="M10 11v6M14 11v6" />
-              <path d="M9 6V4h6v2" />
-            </svg>
-            Remove
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                <path d="M10 11v6M14 11v6" />
+                <path d="M9 6V4h6v2" />
+              </svg>
+              Remove
+            </button>
+          </div>
+
+          {/* Price Change Alerts */}
+          {hasPriceChanged && priceDiff < 0 && (
+            <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-100 rounded-md w-full">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+                <polyline points="17 6 23 6 23 12"></polyline>
+              </svg>
+              <span className="text-[10px] text-green-700 font-medium tracking-wide">
+                Price dropped! You saved {price?.currency || "INR"} {absDiff.toLocaleString("en-IN")}, you get this at {price?.currency || "INR"} {currentPriceAmt.toLocaleString("en-IN")}.
+              </span>
+            </div>
+          )}
+          {hasPriceChanged && priceDiff > 0 && (
+            <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-100 rounded-md w-full">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span className="text-[10px] text-amber-700 font-medium tracking-wide">
+                Price increased to {price?.currency || "INR"} {currentPriceAmt.toLocaleString("en-IN")}. You will pay {price?.currency || "INR"} {absDiff.toLocaleString("en-IN")} more at checkout.
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -215,7 +254,12 @@ const EmptyCart = () => {
 const Cart = () => {
   const cartItems = useSelector((state) => state.cart.items);
   const user = useSelector((state) => state.auth.user);
-  const { handleGetCart } = useCart();
+  const {
+    handleGetCart,
+    handleIncrementCartItem,
+    handleDecrementCartItem,
+    handleRemoveFromCart,
+  } = useCart();
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -247,21 +291,40 @@ const Cart = () => {
 
   const getQuantity = (itemId) => quantities[itemId] ?? 1;
 
-  const handleQuantityChange = (itemId, newQty) => {
-    if (newQty < 1) return;
-    setQuantities((prev) => ({ ...prev, [itemId]: newQty }));
+  const handleDecrement = async (productId, variantId, itemId) => {
+    setQuantities((prev) => ({ ...prev, [itemId]: (prev[itemId] || 1) - 1 }));
+    try {
+      await handleDecrementCartItem({ productId, variantId });
+    } catch (error) {
+      // Revert if API fails
+      setQuantities((prev) => ({ ...prev, [itemId]: (prev[itemId] || 1) + 1 }));
+    }
   };
 
-  const handleRemove = (itemId) => {
-    // TODO: wire to remove API
-    console.log("remove", itemId);
+  const handleIncrement = async (productId, variantId, itemId) => {
+    setQuantities((prev) => ({ ...prev, [itemId]: (prev[itemId] || 1) + 1 }));
+    try {
+      await handleIncrementCartItem({ productId, variantId });
+    } catch (error) {
+      // Revert if API fails
+      setQuantities((prev) => ({ ...prev, [itemId]: (prev[itemId] || 2) - 1 }));
+    }
+  };
+
+  const handleRemove = async (productId, variantId) => {
+    try {
+      await handleRemoveFromCart({ productId, variantId });
+    } catch (error) {
+      console.error("Failed to remove from cart", error);
+    }
   };
 
   // Order summary calculations
-  const subtotal = cartItems?.reduce((acc, item) => {
-    const qty = getQuantity(item._id);
-    return acc + (item.price?.amount || 0) * qty;
-  }, 0) || 0;
+  const subtotal =
+    cartItems?.reduce((acc, item) => {
+      const qty = getQuantity(item._id);
+      return acc + (item.price?.amount || 0) * qty;
+    }, 0) || 0;
 
   const currency = cartItems?.[0]?.price?.currency || "INR";
   const shippingFree = true;
@@ -272,10 +335,7 @@ const Cart = () => {
 
   return (
     <div className="min-h-screen bg-[#F9F9F6] text-[#2C2C2A] font-sans selection:bg-[#2C2C2A] selection:text-[#F9F9F6]">
-
-      {/* ── Page Content ── */}
-      <div className="max-w-7xl mx-auto px-6 md:px-10 pt-28 pb-24">
-
+      <div className="max-w-7xl mx-auto px-6 md:px-10 pt-10 pb-24">
         {/* Page Header */}
         <div className="mb-12">
           <p className="text-[#8A8678] text-[10px] md:text-xs uppercase tracking-[0.3em] mb-3 font-medium">
@@ -310,7 +370,6 @@ const Cart = () => {
         ) : (
           /* ── Populated Cart ── */
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-10 items-start">
-
             {/* LEFT — Cart Items */}
             <div className="space-y-4">
               <p className="text-[#8A8678] text-[10px] uppercase tracking-[0.3em] mb-6 font-semibold">
@@ -321,7 +380,8 @@ const Cart = () => {
                   key={item._id}
                   item={{ ...item, quantity: getQuantity(item._id) }}
                   onRemove={handleRemove}
-                  onQuantityChange={handleQuantityChange}
+                  onDecrement={handleDecrement}
+                  onIncrement={handleIncrement}
                 />
               ))}
             </div>
@@ -329,7 +389,6 @@ const Cart = () => {
             {/* RIGHT — Order Summary */}
             <div className="lg:sticky lg:top-28">
               <div className="bg-[#F0EFEA] rounded-2xl border border-[#E0DFD8] p-6 md:p-8 relative overflow-hidden">
-
                 <p className="text-[#8A8678] text-[10px] uppercase tracking-[0.3em] mb-7 font-semibold">
                   Order Summary
                 </p>
@@ -463,9 +522,15 @@ const Cart = () => {
             © 2026 SNITCH. ESTABLISHED IN AURA BLANC.
           </span>
           <div className="flex gap-6 text-[#8A8678] text-xs uppercase tracking-widest font-medium">
-            <Link to="#" className="hover:text-[#2C2C2A] transition-colors">Privacy</Link>
-            <Link to="#" className="hover:text-[#2C2C2A] transition-colors">Shipping</Link>
-            <Link to="#" className="hover:text-[#2C2C2A] transition-colors">Returns</Link>
+            <Link to="#" className="hover:text-[#2C2C2A] transition-colors">
+              Privacy
+            </Link>
+            <Link to="#" className="hover:text-[#2C2C2A] transition-colors">
+              Shipping
+            </Link>
+            <Link to="#" className="hover:text-[#2C2C2A] transition-colors">
+              Returns
+            </Link>
           </div>
         </div>
       </footer>

@@ -8,7 +8,7 @@ import Home from "../features/products/pages/Home";
 import ProductDetail from "../features/products/pages/ProductDetail";
 import SellerProductDetail from "../features/products/pages/SellerProductDetail";
 import Cart from "../features/cart/pages/Cart";
-import Layout from "../app/Layout";
+import Layout from "./Layout";
 
 export const routes = createBrowserRouter([
   {
