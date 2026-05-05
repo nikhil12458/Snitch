@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useCart } from "../hook/useCart";
 import { Link, useNavigate } from "react-router";
+import { useRazorpay } from "react-razorpay";
 
 /* ─────────────────────────────────────────
    Quantity Stepper
@@ -51,13 +52,19 @@ const CartItemCard = ({ item, onRemove, onDecrement, onIncrement }) => {
 
   // Price difference calculation
   let currentPriceAmt = variantObj?.price?.amount ?? product?.price?.amount;
-  if (currentPriceAmt === undefined && typeof variantObj?.price === "number") currentPriceAmt = variantObj.price;
-  if (currentPriceAmt === undefined && typeof product?.price === "number") currentPriceAmt = product.price;
+  if (currentPriceAmt === undefined && typeof variantObj?.price === "number")
+    currentPriceAmt = variantObj.price;
+  if (currentPriceAmt === undefined && typeof product?.price === "number")
+    currentPriceAmt = product.price;
 
   let cartPriceAmt = price?.amount;
-  if (cartPriceAmt === undefined && typeof price === "number") cartPriceAmt = price;
+  if (cartPriceAmt === undefined && typeof price === "number")
+    cartPriceAmt = price;
 
-  const hasPriceChanged = currentPriceAmt !== undefined && cartPriceAmt !== undefined && currentPriceAmt !== cartPriceAmt;
+  const hasPriceChanged =
+    currentPriceAmt !== undefined &&
+    cartPriceAmt !== undefined &&
+    currentPriceAmt !== cartPriceAmt;
   const priceDiff = hasPriceChanged ? currentPriceAmt - cartPriceAmt : 0;
   const absDiff = Math.abs(priceDiff);
 
@@ -156,24 +163,52 @@ const CartItemCard = ({ item, onRemove, onDecrement, onIncrement }) => {
           {/* Price Change Alerts */}
           {hasPriceChanged && priceDiff < 0 && (
             <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-100 rounded-md w-full">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#16a34a"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="flex-shrink-0"
+              >
                 <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
                 <polyline points="17 6 23 6 23 12"></polyline>
               </svg>
               <span className="text-[10px] text-green-700 font-medium tracking-wide">
-                Price dropped! You saved {price?.currency || "INR"} {absDiff.toLocaleString("en-IN")}, you get this at {price?.currency || "INR"} {currentPriceAmt.toLocaleString("en-IN")}.
+                Price dropped! You saved {price?.currency || "INR"}{" "}
+                {absDiff.toLocaleString("en-IN")}, you get this at{" "}
+                {price?.currency || "INR"}{" "}
+                {currentPriceAmt.toLocaleString("en-IN")}.
               </span>
             </div>
           )}
           {hasPriceChanged && priceDiff > 0 && (
             <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-100 rounded-md w-full">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#d97706"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="flex-shrink-0"
+              >
                 <circle cx="12" cy="12" r="10"></circle>
                 <line x1="12" y1="8" x2="12" y2="12"></line>
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
               </svg>
               <span className="text-[10px] text-amber-700 font-medium tracking-wide">
-                Price increased to {price?.currency || "INR"} {currentPriceAmt.toLocaleString("en-IN")}. You will pay {price?.currency || "INR"} {absDiff.toLocaleString("en-IN")} more at checkout.
+                Price increased to {price?.currency || "INR"}{" "}
+                {currentPriceAmt.toLocaleString("en-IN")}. You will pay{" "}
+                {price?.currency || "INR"} {absDiff.toLocaleString("en-IN")}{" "}
+                more at checkout.
               </span>
             </div>
           )}
@@ -257,11 +292,14 @@ const Cart = () => {
   const cartState = useSelector((state) => state.cart);
   const cartItems = cartState?.items || [];
   const user = useSelector((state) => state.auth.user);
+  const { error, isLoading: isRazorpayLoading, Razorpay } = useRazorpay();
   const {
     handleGetCart,
     handleIncrementCartItem,
     handleDecrementCartItem,
     handleRemoveFromCart,
+    handleCreateCartOrder,
+    handleVerifyCartOrder
   } = useCart();
   const navigate = useNavigate();
 
@@ -325,10 +363,42 @@ const Cart = () => {
   const subtotal = cartState?.totalPrice || 0;
   const currency = cartState?.currency || "INR";
   const shippingFree = true;
-  const tax = Math.round(subtotal * 0.05); // 5% GST
-  const total = subtotal + (shippingFree ? 0 : 0) + tax;
+  const total = subtotal + (shippingFree ? 0 : 0);
 
   const itemCount = cartItems?.length || 0;
+
+  async function handleCheckout() {
+    const order = await handleCreateCartOrder();
+    console.log(order);
+
+    const options = {
+      key: "rzp_test_SlcVGbkvta8NEG",
+      amount: order.amount, // Amount in paise
+      currency: order.currency,
+      name: "Snitch",
+      description: "Test Transaction",
+      order_id: order.id, // Generate order_id on server
+      handler: async (response) => {
+        const isValid = await handleVerifyCartOrder(response) 
+
+        if(isValid){
+          navigate(`/order-success?order_id=${response?.razorpay_order_id}`)
+        }
+        
+      },
+      prefill: {
+        name: user?.fullname,
+        email: user?.email,
+        contact: user?.contact,
+      },
+      theme: {
+        color: "#F9F9F6",
+      },
+    };
+
+    const razorpayInstance = new Razorpay(options);
+    razorpayInstance.open();
+  }
 
   return (
     <div className="min-h-screen bg-[#F9F9F6] text-[#2C2C2A] font-sans selection:bg-[#2C2C2A] selection:text-[#F9F9F6]">
@@ -408,14 +478,6 @@ const Cart = () => {
                       Complimentary
                     </span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[#8A8678] text-sm font-light">
-                      GST (5%)
-                    </span>
-                    <span className="text-[#2C2C2A] text-sm font-medium">
-                      {currency} {tax.toLocaleString("en-IN")}
-                    </span>
-                  </div>
                 </div>
 
                 {/* Divider */}
@@ -432,7 +494,10 @@ const Cart = () => {
                 </div>
 
                 {/* Primary CTA */}
-                <button className="w-full h-13 py-4 bg-[#2C2C2A] hover:bg-[#1A1A1A] text-[#F9F9F6] text-xs font-bold uppercase tracking-[0.2em] rounded-full transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
+                <button
+                  onClick={handleCheckout}
+                  className="w-full h-13 py-4 bg-[#2C2C2A] hover:bg-[#1A1A1A] text-[#F9F9F6] text-xs font-bold uppercase tracking-[0.2em] rounded-full transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                >
                   Proceed to Checkout
                 </button>
 

@@ -1,9 +1,11 @@
 import {
   addItem,
+  createCartOrder,
   decrementCartItemApi,
   getCart,
   incrementCartItemApi,
   removeFromCartApi,
+  verifyCartOrder,
 } from "../service/cart.api";
 import { useDispatch } from "react-redux";
 import {
@@ -36,11 +38,11 @@ export const useCart = () => {
   async function handleIncrementCartItem({ productId, variantId }) {
     // 1. Optimistic UI update
     dispatch(incrementCartItem({ productId, variantId }));
-    
+
     try {
       // 2. Network request
       const data = await incrementCartItemApi({ productId, variantId });
-      
+
       // 3. Background sync with backend truth
       if (data?.items || data?.cart?.items) {
         dispatch(setCart(data?.items ? data : data?.cart));
@@ -58,11 +60,11 @@ export const useCart = () => {
   async function handleDecrementCartItem({ productId, variantId }) {
     // 1. Optimistic UI update
     dispatch(decrementCartItem({ productId, variantId }));
-    
+
     try {
       // 2. Network request
       const data = await decrementCartItemApi({ productId, variantId });
-      
+
       // 3. Background sync with backend truth
       if (data?.items || data?.cart?.items) {
         dispatch(setCart(data?.items ? data : data?.cart));
@@ -82,7 +84,7 @@ export const useCart = () => {
     // so we'll wait for the network request before syncing.
     try {
       const data = await removeFromCartApi({ productId, variantId });
-      
+
       if (data?.items || data?.cart?.items) {
         dispatch(setCart(data?.items ? data : data?.cart));
       } else {
@@ -94,11 +96,23 @@ export const useCart = () => {
     }
   }
 
+  async function handleCreateCartOrder() {
+    const data = await createCartOrder();
+    return data.order;
+  }
+
+  async function handleVerifyCartOrder({razorpay_order_id, razorpay_payment_id, razorpay_signature}) {
+    const data = await verifyCartOrder({razorpay_order_id, razorpay_payment_id, razorpay_signature});
+    return data.success;
+  }
+
   return {
     handleAddItem,
     handleGetCart,
     handleIncrementCartItem,
     handleDecrementCartItem,
     handleRemoveFromCart,
+    handleCreateCartOrder,
+    handleVerifyCartOrder
   };
 };
