@@ -32,8 +32,10 @@ const QuantityStepper = ({ value, onDecrement, onIncrement }) => (
 const CartItemCard = ({ item, onRemove, onDecrement, onIncrement }) => {
   const { product, variant: variantId, quantity, price } = item;
 
-  // Resolve the variant object from the product's variants array
-  const variantObj = product?.variants?.find((v) => v._id === variantId);
+  // Resolve the variant object from the product's variants array or object
+  const variantObj = Array.isArray(product?.variants)
+    ? product.variants.find((v) => v._id === variantId)
+    : product?.variants;
 
   // Pick best image: variant images first, then product images
   const images =
@@ -252,7 +254,8 @@ const EmptyCart = () => {
    Main Cart Page
 ───────────────────────────────────────── */
 const Cart = () => {
-  const cartItems = useSelector((state) => state.cart.items);
+  const cartState = useSelector((state) => state.cart);
+  const cartItems = cartState?.items || [];
   const user = useSelector((state) => state.auth.user);
   const {
     handleGetCart,
@@ -319,14 +322,8 @@ const Cart = () => {
     }
   };
 
-  // Order summary calculations
-  const subtotal =
-    cartItems?.reduce((acc, item) => {
-      const qty = getQuantity(item._id);
-      return acc + (item.price?.amount || 0) * qty;
-    }, 0) || 0;
-
-  const currency = cartItems?.[0]?.price?.currency || "INR";
+  const subtotal = cartState?.totalPrice || 0;
+  const currency = cartState?.currency || "INR";
   const shippingFree = true;
   const tax = Math.round(subtotal * 0.05); // 5% GST
   const total = subtotal + (shippingFree ? 0 : 0) + tax;

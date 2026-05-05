@@ -4,7 +4,7 @@ import { Link } from "react-router";
 
 const Navbar = () => {
   const user = useSelector((state) => state.auth.user);
-  const cartItems = useSelector((state) => state.cart.items);
+  const cartItems = useSelector((state) => state.cart?.items);
   const cartItemCount = cartItems?.length || 0;
 
   return (
