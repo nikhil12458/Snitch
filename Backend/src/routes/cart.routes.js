@@ -94,6 +94,9 @@ router.delete(
 
 router.post("/payment/create/order", authenticateUser, createOrderController)
 
+/*
+  @route POST /api/cart/payment/verify/order
+ */
 router.post("/payment/verify/order", authenticateUser, verifyOrderController)
 
 export default router;
