@@ -55,5 +55,4 @@ export const verifyCartOrder = async ({razorpay_order_id, razorpay_payment_id, r
   })
 
   return response.data
-  
 }
