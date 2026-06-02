@@ -43,4 +43,5 @@ export const config = {
   RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
   RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
   PORT: process.env.PORT || 3000,
+  FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:5173",
 };
