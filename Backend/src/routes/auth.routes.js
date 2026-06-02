@@ -11,6 +11,7 @@ import {
 } from "../controllers/auth.controller.js";
 import passport from "passport";
 import { authenticateUser } from "../middlewares/auth.middleware.js";
+import { config } from "../config/config.js";
 
 const router = Router();
 
@@ -24,7 +25,7 @@ router.get(
   "/google/callback",
   passport.authenticate("google", {
     session: false,
-    failureRedirect: "http://localhost:5173/login",
+    failureRedirect: `${config.FRONTEND_URL}/login`,
   }),
   googleCallback,
 );
