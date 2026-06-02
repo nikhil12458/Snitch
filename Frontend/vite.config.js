@@ -9,7 +9,7 @@ export default defineConfig({
     proxy: {
       "/api": {
         // target: "http://localhost:3000",
-        target: "snitch-production.up.railway.app",
+        target: "https://snitch-production.up.railway.app",
         changeOrigin: true,
         secure: false,
       },
