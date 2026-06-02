@@ -1,7 +1,9 @@
 import axios from "axios";
 
+const API_BASE_URL = "https://snitch-production.up.railway.app";
+
 const productApiInstance = axios.create({
-  baseURL: "/api/products",
+  baseURL: `${API_BASE_URL}/api/products`,
   withCredentials: true,
 });
 
