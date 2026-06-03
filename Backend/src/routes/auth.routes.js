@@ -7,6 +7,7 @@ import {
   getMe,
   googleCallback,
   login,
+  logout,
   register,
 } from "../controllers/auth.controller.js";
 import passport from "passport";
@@ -29,6 +30,13 @@ router.get(
   }),
   googleCallback,
 );
+
+/*
+    @route POST /api/auth/logout
+    @desc Logout the user by clearing the token cookie
+    @access Private
+ */
+router.post("/logout", logout);
 
 /*
     @route GET /api/auth/me

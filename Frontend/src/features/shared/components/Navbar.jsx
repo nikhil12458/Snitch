@@ -1,11 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { useAuth } from "../../../features/auth/hook/useAuth";
 
 const Navbar = () => {
   const user = useSelector((state) => state.auth.user);
   const cartItems = useSelector((state) => state.cart?.items);
   const cartItemCount = cartItems?.length || 0;
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const { handleLogout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogoutClick = async () => {
+    try {
+      await handleLogout();
+      setShowProfileMenu(false);
+      navigate("/login");
+    } catch (error) {
+      console.log("Logout error:", error);
+    }
+  };
 
   return (
     <nav className="sticky top-0 w-full z-50 bg-[#F9F9F6]/90 backdrop-blur-xl border-b border-[#E0DFD8] px-6 md:px-10 py-4 flex justify-between items-center transition-all duration-300">
@@ -72,16 +86,40 @@ const Navbar = () => {
         </Link>
 
         {user ? (
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-[#2C2C2A] flex items-center justify-center text-[#F9F9F6] text-xs font-medium border border-[#E0DFD8] shadow-sm">
-              {(user?.fullname ||
-                user?.name ||
-                user?.firstName ||
-                "U")[0].toUpperCase()}
-            </div>
-            <span className="text-sm tracking-widest text-[#8A8678] font-medium hidden sm:block uppercase">
-              {user?.fullname || user?.name || user?.firstName || "User"}
-            </span>
+          <div className="relative">
+            <button
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="flex items-center gap-3 hover:opacity-80 transition-opacity duration-200"
+            >
+              <div className="w-8 h-8 rounded-full bg-[#2C2C2A] flex items-center justify-center text-[#F9F9F6] text-xs font-medium border border-[#E0DFD8] shadow-sm">
+                {(user?.fullname ||
+                  user?.name ||
+                  user?.firstName ||
+                  "U")[0].toUpperCase()}
+              </div>
+              <span className="text-sm tracking-widest text-[#8A8678] font-medium hidden sm:block uppercase">
+                {user?.fullname || user?.name || user?.firstName || "User"}
+              </span>
+            </button>
+
+            {showProfileMenu && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-[#E0DFD8] overflow-hidden z-50">
+                <div className="px-4 py-3 border-b border-[#E0DFD8]">
+                  <p className="text-sm font-medium text-[#2C2C2A]">
+                    {user?.fullname || user?.name || "User"}
+                  </p>
+                  <p className="text-xs text-[#8A8678]">
+                    {user?.email}
+                  </p>
+                </div>
+                <button
+                  onClick={handleLogoutClick}
+                  className="w-full px-4 py-2.5 text-left text-sm text-[#2C2C2A] hover:bg-[#F9F9F6] transition-colors duration-200 font-medium"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <Link
