@@ -1,9 +1,13 @@
 import React from "react";
+import { API_BASE_URL } from "../../../config/apiConfig";
 
 const ContinueWithGoogle = () => {
+  // Construct the full Google OAuth URL
+  const googleOAuthUrl = `${API_BASE_URL}/auth/google`;
+
   return (
     <a
-      href="https://snitch-production.up.railway.app/api/auth/google"
+      href={googleOAuthUrl}
       className="w-full flex items-center justify-center space-x-3 bg-[#1A1A1A] hover:bg-[#222222] text-white font-medium py-3.5 lg:py-4 px-6 rounded-xl border border-[#2A2A2A] hover:border-[#3A3A3A] transition-all transform hover:-translate-y-0.5"
     >
       <svg

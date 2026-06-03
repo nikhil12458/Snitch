@@ -52,11 +52,14 @@ export const useAuth = () => {
   async function handleGetMe() {
     try {
       dispatch(setLoading(true));
+      console.log("Calling getMe API...");
       const data = await getMe();
+      console.log("getMe response:", data);
       dispatch(setUser(data.user));
       return data.user;
     } catch (error) {
       console.log("Get me error:", error?.message);
+      console.log("Error details:", error?.response?.data);
       // This is expected if no token exists, not a critical error
       return null;
     } finally {

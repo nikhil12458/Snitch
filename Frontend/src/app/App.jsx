@@ -16,11 +16,14 @@ function App() {
 
     const initializeAuth = async () => {
       try {
-        await handleGetMe();
+        console.log("Starting auth initialization...");
+        const user = await handleGetMe();
+        console.log("Auth initialized, user:", user);
       } catch (err) {
         console.error("Auth initialization error:", err);
       } finally {
         if (isMounted) {
+          console.log("Setting initialized to true");
           setInitialized(true);
         }
       }
@@ -39,7 +42,7 @@ function App() {
       <div className="min-h-screen flex items-center justify-center bg-[#F9F9F6]">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-[#E0DFD8] border-t-[#2C2C2A] rounded-full animate-spin"></div>
-          <p className="text-[#8A8678]">Loading...</p>
+          <p className="text-[#8A8678]">Authenticating...</p>
         </div>
       </div>
     );

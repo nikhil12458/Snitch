@@ -86,40 +86,60 @@ export const login = async (req, res) => {
 };
 
 export const googleCallback = async (req, res) => {
-  const { id, displayName, emails, photos } = req.user;
-  const email = emails[0].value;
-  const profilePic = photos[0].value;
+  try {
+    const { id, displayName, emails, photos } = req.user;
+    const email = emails[0]?.value;
 
-  let user = await userModel.findOne({ email });
+    if (!email) {
+      return res.redirect(`${config.FRONTEND_URL}/login?error=Email not provided by Google`);
+    }
 
-  if (!user) {
-    user = await userModel.create({
-      email,
-      googleId: id,
-      fullname: displayName,
+    let user = await userModel.findOne({ email });
+
+    if (!user) {
+      console.log("Creating new Google user:", { email, displayName });
+      user = await userModel.create({
+        email,
+        googleId: id,
+        fullname: displayName,
+        role: "buyer", // Set default role for Google users
+      });
+    } else {
+      // Update Google ID if not already set
+      if (!user.googleId) {
+        user.googleId = id;
+        await user.save();
+      }
+    }
+
+    const token = jwt.sign(
+      {
+        id: user._id,
+      },
+      config.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      },
+    );
+
+    const isProduction = process.env.NODE_ENV === "production";
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
     });
+
+    console.log("Google OAuth successful for user:", user._id);
+
+    // Redirect to frontend with a success indicator
+    res.redirect(`${config.FRONTEND_URL}/?auth_success=true`);
+  } catch (error) {
+    console.error("Google callback error:", error);
+    res.redirect(`${config.FRONTEND_URL}/login?error=Authentication failed`);
   }
-
-  const token = jwt.sign(
-    {
-      id: user._id,
-    },
-    config.JWT_SECRET,
-    {
-      expiresIn: "7d",
-    },
-  );
-
-  const isProduction = process.env.NODE_ENV === "production";
-
-  res.cookie("token", token, {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-  });
-
-  res.redirect(`${config.FRONTEND_URL}/`);
 };
 
 export const getMe = async (req, res) => {
