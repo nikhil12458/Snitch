@@ -20,6 +20,7 @@ async function sendTokenResponse(user, res, message) {
     secure: isProduction,
     sameSite: isProduction ? "none" : "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: "/", // CRITICAL: Must be consistent with all other cookie operations
   });
 
   res.status(200).json({
@@ -101,6 +102,7 @@ export const googleCallback = async (req, res) => {
     
     // Find existing user or create new one
     let user = await userModel.findOne({ email });
+    let isNewUser = !user;
 
     if (!user) {
       console.log("🆕 [googleCallback] Creating new Google user for email:", email);
@@ -113,13 +115,16 @@ export const googleCallback = async (req, res) => {
       console.log("✅ [googleCallback] New user created with ID:", user._id, "Role:", user.role);
     } else {
       console.log("👤 [googleCallback] Existing user found with ID:", user._id, "Email:", user.email, "Role:", user.role);
+      console.log("🔐 [googleCallback] LOGGING IN existing user");
       
       // Update Google ID if not already set
       if (!user.googleId) {
-        console.log("🔄 [googleCallback] Updating existing user with googleId");
+        console.log("🔄 [googleCallback] Linking Google account to existing user");
         user.googleId = id;
         await user.save();
-        console.log("✅ [googleCallback] User updated with googleId");
+        console.log("✅ [googleCallback] User account linked with Google OAuth");
+      } else {
+        console.log("✅ [googleCallback] Google account already linked");
       }
     }
 
@@ -162,11 +167,12 @@ export const googleCallback = async (req, res) => {
       maxAge: "7 days",
     });
 
-    console.log("✅ [googleCallback] Google OAuth successful - User:", {
+    console.log(`✅ [googleCallback] Google OAuth successful (${isNewUser ? "NEW" : "EXISTING"} user) - User:`, {
       id: user._id,
       email: user.email,
       fullname: user.fullname,
       role: user.role,
+      isNewUser,
     });
 
     // Redirect to frontend - the frontend will call getMe() during initialization
