@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../hook/useAuth";
+import { useSelector } from "react-redux";
 import ContinueWithGoogle from "../components/ContinueWithGoogle";
 
 const Login = () => {
   const { handleLogin } = useAuth();
   const navigate = useNavigate();
+  const loading = useSelector((state) => state.auth.loading);
+  const error = useSelector((state) => state.auth.error);
+  const [localError, setLocalError] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -17,22 +21,26 @@ const Login = () => {
       ...prev,
       [name]: value,
     }));
+    setLocalError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLocalError("");
     try {
       const user = await handleLogin({
         email: formData.email,
         password: formData.password,
       });
-      if (user.role == "buyer") {
+      if (user?.role === "buyer") {
         navigate("/");
-      } else if (user.role == "seller") {
+      } else if (user?.role === "seller") {
         navigate("/seller/dashboard");
       }
-    } catch (error) {
-      console.log("Login failed: ", error);
+    } catch (err) {
+      const errorMsg = err?.response?.data?.message || err?.message || "Login failed. Please try again.";
+      setLocalError(errorMsg);
+      console.error("Login error:", err);
     }
   };
 
@@ -140,11 +148,17 @@ const Login = () => {
             </div>
 
             <div className="pt-4 lg:pt-6">
+              {(localError || error) && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-700">{localError || error}</p>
+                </div>
+              )}
               <button
                 type="submit"
-                className="w-full bg-[#2C2C2A] hover:bg-[#1A1A1A] text-[#F9F9F6] font-medium tracking-widest uppercase py-3.5 lg:py-4 px-6 rounded-xl transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                disabled={loading}
+                className="w-full bg-[#2C2C2A] hover:bg-[#1A1A1A] disabled:bg-[#8A8678] text-[#F9F9F6] font-medium tracking-widest uppercase py-3.5 lg:py-4 px-6 rounded-xl transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:hover:shadow-md disabled:hover:translate-y-0"
               >
-                Sign In
+                {loading ? "Signing In..." : "Sign In"}
               </button>
 
               {/* Divider */}

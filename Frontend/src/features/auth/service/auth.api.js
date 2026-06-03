@@ -4,7 +4,21 @@ import { API_BASE_URL } from "../../../config/apiConfig";
 const authApiInstance = axios.create({
   baseURL: `${API_BASE_URL}/auth`,
   withCredentials: true,
+  timeout: 10000,
 });
+
+// Add response interceptor for better error handling
+authApiInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error("Auth API Error:", {
+      status: error.response?.status,
+      message: error.response?.data?.message || error.message,
+      url: error.config?.url,
+    });
+    return Promise.reject(error);
+  }
+);
 
 export async function register({
   email,

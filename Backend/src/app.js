@@ -22,9 +22,10 @@ app.use(
       "http://localhost:5173",
       "http://localhost:3000",
     ],
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
+    maxAge: 86400,
   }),
 );
 
@@ -40,6 +41,17 @@ passport.use(
     },
   ),
 );
+
+// Minimal serialization (not needed for JWT but required by passport)
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
+
+app.use(passport.initialize());
 
 app.get("/", (_req, res) => {
   res.status(200).json({ message: "Server is running" });

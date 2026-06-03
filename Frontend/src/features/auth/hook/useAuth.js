@@ -56,10 +56,11 @@ export const useAuth = () => {
       dispatch(setUser(data.user));
       return data.user;
     } catch (error) {
-      console.log("Get me error:", error);
+      console.log("Get me error:", error?.message);
       // This is expected if no token exists, not a critical error
-      dispatch(setLoading(false));
       return null;
+    } finally {
+      dispatch(setLoading(false));
     }
   }
 

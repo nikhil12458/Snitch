@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { useAuth } from "../hook/useAuth";
+import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router";
 import ContinueWithGoogle from "../components/ContinueWithGoogle";
 
 const Register = () => {
   const { handleRegister } = useAuth();
   const navigate = useNavigate();
+  const loading = useSelector((state) => state.auth.loading);
+  const error = useSelector((state) => state.auth.error);
+  const [localError, setLocalError] = useState("");
 
   const [formData, setFormData] = useState({
     fullName: "",
@@ -21,18 +25,26 @@ const Register = () => {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+    setLocalError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await handleRegister({
-      email: formData.email,
-      password: formData.password,
-      contact: formData.contact,
-      fullname: formData.fullName,
-      isSeller: formData.isSeller,
-    });
-    navigate("/");
+    setLocalError("");
+    try {
+      await handleRegister({
+        email: formData.email,
+        password: formData.password,
+        contact: formData.contact,
+        fullname: formData.fullName,
+        isSeller: formData.isSeller,
+      });
+      navigate("/");
+    } catch (err) {
+      const errorMsg = err?.response?.data?.message || err?.message || "Registration failed. Please try again.";
+      setLocalError(errorMsg);
+      console.error("Registration error:", err);
+    }
   };
 
   return (
@@ -206,11 +218,17 @@ const Register = () => {
             </div>
 
             <div className="pt-4 lg:pt-6 space-y-4 lg:space-y-5">
+              {(localError || error) && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                  <p className="text-sm text-red-700">{localError || error}</p>
+                </div>
+              )}
               <button
                 type="submit"
-                className="w-full bg-[#2C2C2A] hover:bg-[#1A1A1A] text-[#F9F9F6] font-medium tracking-widest uppercase py-3.5 lg:py-4 px-6 rounded-xl transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                disabled={loading}
+                className="w-full bg-[#2C2C2A] hover:bg-[#1A1A1A] disabled:bg-[#8A8678] text-[#F9F9F6] font-medium tracking-widest uppercase py-3.5 lg:py-4 px-6 rounded-xl transition-all shadow-md hover:shadow-lg transform hover:-translate-y-0.5 disabled:hover:shadow-md disabled:hover:translate-y-0"
               >
-                Create Account
+                {loading ? "Creating Account..." : "Create Account"}
               </button>
 
               {/* Divider */}
