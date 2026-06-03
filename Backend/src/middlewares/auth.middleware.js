@@ -3,7 +3,7 @@ import { config } from "../config/config.js";
 import userModel from "../models/user.model.js";
 
 export const authenticateUser = async (req, res, next) => {
-  console.log("cookie header :" ,req.headers.cookies)
+  console.log("cookie header :" ,req.headers.cookie)
   console.log("cookies :" ,req.cookies)
   const token = req.cookies?.token;
 
