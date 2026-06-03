@@ -13,12 +13,12 @@ async function sendTokenResponse(user, res, message) {
     },
   );
 
-  const isProduction = process.env.NODE_ENV === "production";
+  // const isProduction = process.env.NODE_ENV === "production";
 
   res.cookie("token", token, {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
+    secure: true,
+    sameSite: "none",
     maxAge: 7 * 24 * 60 * 60 * 1000,
     path: "/", // CRITICAL: Must be consistent with all other cookie operations
   });
@@ -153,16 +153,16 @@ export const googleCallback = async (req, res) => {
     // Set cookie with ALL required options
     res.cookie("token", token, {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "none" : "lax",
+      secure: true,
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
       path: "/",
     });
 
     console.log("✅ [googleCallback] Token cookie set with options:", {
       httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "none" : "lax",
+      secure: true,
+      sameSite: "none",
       path: "/",
       maxAge: "7 days",
     });
