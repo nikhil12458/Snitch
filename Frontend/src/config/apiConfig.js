@@ -7,7 +7,7 @@ const getApiBaseUrl = () => {
   if (isDevelopment) {
     return "/api";
   }
-  return "https://snitch-production.up.railway.app/api";
+  return import.meta.env.VITE_API_BASE_URL || "https://snitch-production.up.railway.app/api";
 };
 
 export const API_BASE_URL = getApiBaseUrl();
