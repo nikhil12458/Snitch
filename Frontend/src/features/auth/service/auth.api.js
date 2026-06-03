@@ -7,14 +7,29 @@ const authApiInstance = axios.create({
   timeout: 10000,
 });
 
+// Add request interceptor to log outgoing requests
+authApiInstance.interceptors.request.use(
+  (config) => {
+    console.log("📤 [Auth API] Request:", config.method?.toUpperCase(), config.url);
+    console.log("📤 [Auth API] withCredentials:", config.withCredentials);
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Add response interceptor for better error handling
 authApiInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log("✅ [Auth API] Response received:", response.config.url, "Status:", response.status);
+    console.log("✅ [Auth API] Response data:", response.data);
+    return response;
+  },
   (error) => {
-    console.error("Auth API Error:", {
+    console.error("❌ [Auth API] Error:", {
       status: error.response?.status,
       message: error.response?.data?.message || error.message,
       url: error.config?.url,
+      method: error.config?.method?.toUpperCase(),
     });
     return Promise.reject(error);
   }

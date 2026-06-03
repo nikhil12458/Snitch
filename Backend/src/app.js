@@ -37,6 +37,11 @@ passport.use(
       callbackURL: "/api/auth/google/callback",
     },
     (accessToken, refreshToken, profile, done) => {
+      console.log("🔄 [Passport] Google profile received:", {
+        id: profile.id,
+        displayName: profile.displayName,
+        email: profile.emails[0]?.value,
+      });
       return done(null, profile);
     },
   ),

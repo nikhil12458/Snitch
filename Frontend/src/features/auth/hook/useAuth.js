@@ -52,14 +52,22 @@ export const useAuth = () => {
   async function handleGetMe() {
     try {
       dispatch(setLoading(true));
-      console.log("Calling getMe API...");
+      console.log("🔄 [useAuth] Calling getMe API...");
+      console.log("🔄 [useAuth] Checking for token cookie...");
+      
       const data = await getMe();
-      console.log("getMe response:", data);
+      console.log("✅ [useAuth] getMe response received:", data);
+      console.log("✅ [useAuth] User authenticated:", data.user);
+      
       dispatch(setUser(data.user));
       return data.user;
     } catch (error) {
-      console.log("Get me error:", error?.message);
-      console.log("Error details:", error?.response?.data);
+      console.log("⚠️ [useAuth] getMe failed (this is OK if user not logged in):", error?.message);
+      if (error?.response?.status === 401) {
+        console.log("⚠️ [useAuth] 401 Unauthorized - no valid token");
+      } else {
+        console.log("⚠️ [useAuth] Error details:", error?.response?.data);
+      }
       // This is expected if no token exists, not a critical error
       return null;
     } finally {

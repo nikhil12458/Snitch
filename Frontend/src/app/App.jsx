@@ -16,14 +16,28 @@ function App() {
 
     const initializeAuth = async () => {
       try {
-        console.log("Starting auth initialization...");
+        console.log("🔄 [App] Starting auth initialization...");
+        console.log("🔄 [App] Current URL:", window.location.href);
+        
+        // Check if we just came back from Google OAuth
+        const params = new URLSearchParams(window.location.search);
+        const googleAuthSuccess = params.get("google_auth");
+        
+        if (googleAuthSuccess === "success") {
+          console.log("✅ [App] Google OAuth redirect detected, calling getMe...");
+        }
+        
         const user = await handleGetMe();
-        console.log("Auth initialized, user:", user);
+        console.log("✅ [App] Auth initialized, user:", user);
+        
+        if (!user) {
+          console.log("⚠️ [App] No user found, user is not authenticated");
+        }
       } catch (err) {
-        console.error("Auth initialization error:", err);
+        console.error("❌ [App] Auth initialization error:", err);
       } finally {
         if (isMounted) {
-          console.log("Setting initialized to true");
+          console.log("✅ [App] Setting initialized to true");
           setInitialized(true);
         }
       }

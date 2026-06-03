@@ -87,31 +87,50 @@ export const login = async (req, res) => {
 
 export const googleCallback = async (req, res) => {
   try {
+    console.log("🔄 [googleCallback] Starting Google callback process...");
+    
     const { id, displayName, emails, photos } = req.user;
     const email = emails[0]?.value;
 
     if (!email) {
+      console.error("❌ [googleCallback] Email not provided by Google");
       return res.redirect(`${config.FRONTEND_URL}/login?error=Email not provided by Google`);
     }
 
+    console.log("🔄 [googleCallback] Email from Google:", email);
+    
+    // Find existing user or create new one
     let user = await userModel.findOne({ email });
 
     if (!user) {
-      console.log("Creating new Google user:", { email, displayName });
+      console.log("🆕 [googleCallback] Creating new Google user for email:", email);
       user = await userModel.create({
         email,
         googleId: id,
-        fullname: displayName,
+        fullname: displayName || email.split("@")[0],
         role: "buyer", // Set default role for Google users
       });
+      console.log("✅ [googleCallback] New user created with ID:", user._id, "Role:", user.role);
     } else {
+      console.log("👤 [googleCallback] Existing user found with ID:", user._id, "Email:", user.email, "Role:", user.role);
+      
       // Update Google ID if not already set
       if (!user.googleId) {
+        console.log("🔄 [googleCallback] Updating existing user with googleId");
         user.googleId = id;
         await user.save();
+        console.log("✅ [googleCallback] User updated with googleId");
       }
     }
 
+    // Verify user has role (critical for later queries)
+    if (!user.role) {
+      console.warn("⚠️ [googleCallback] User missing role field, setting to 'buyer'");
+      user.role = "buyer";
+      await user.save();
+    }
+
+    // Generate JWT token
     const token = jwt.sign(
       {
         id: user._id,
@@ -122,8 +141,11 @@ export const googleCallback = async (req, res) => {
       },
     );
 
+    console.log("🔑 [googleCallback] JWT token generated for user:", user._id);
+
     const isProduction = process.env.NODE_ENV === "production";
 
+    // Set cookie with ALL required options
     res.cookie("token", token, {
       httpOnly: true,
       secure: isProduction,
@@ -132,12 +154,27 @@ export const googleCallback = async (req, res) => {
       path: "/",
     });
 
-    console.log("Google OAuth successful for user:", user._id);
+    console.log("✅ [googleCallback] Token cookie set with options:", {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      path: "/",
+      maxAge: "7 days",
+    });
 
-    // Redirect to frontend with a success indicator
-    res.redirect(`${config.FRONTEND_URL}/?auth_success=true`);
+    console.log("✅ [googleCallback] Google OAuth successful - User:", {
+      id: user._id,
+      email: user.email,
+      fullname: user.fullname,
+      role: user.role,
+    });
+
+    // Redirect to frontend - the frontend will call getMe() during initialization
+    // and will receive the token from the httpOnly cookie
+    res.redirect(`${config.FRONTEND_URL}/?google_auth=success`);
   } catch (error) {
-    console.error("Google callback error:", error);
+    console.error("❌ [googleCallback] Error in Google callback:", error);
+    console.error("❌ [googleCallback] Error stack:", error.stack);
     res.redirect(`${config.FRONTEND_URL}/login?error=Authentication failed`);
   }
 };
@@ -160,11 +197,16 @@ export const getMe = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
+    const isProduction = process.env.NODE_ENV === "production";
+    
     res.clearCookie("token", {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
+      path: "/", // CRITICAL: Must match the path used when setting the cookie
     });
+
+    console.log("User logged out successfully");
 
     res.status(200).json({
       message: "Logged out successfully",
